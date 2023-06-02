@@ -1,2 +1,2 @@
-# PDF
-Pattern, Diversity, and Process for demography-based integrative modelling of ecosystems and the biosphere.
+# PDP: Pattern, Diversity, and Process
+A conceptual framework for Demography-based Integrative Modelling of Ecosystems and the Biosphere.
