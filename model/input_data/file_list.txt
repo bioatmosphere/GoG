@@ -1,0 +1,6 @@
+# UVAFME Input File List
+# Format: key=value
+species_file=species.csv
+site_file=sites.csv
+climate_file=climate.csv
+config_file=uvafme_config.json

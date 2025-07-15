@@ -1,0 +1,3 @@
+species_id,genus_name,taxonomic_name,unique_id,common_name,genus_id,shade_tol,lownutr_tol,stress_tol,age_tol,drought_tol,flood_tol,fire_tol,max_age,max_diam,max_ht,wood_bulk_dens,rootdepth,leafdiam_a,leafarea_c,deg_day_min,deg_day_opt,deg_day_max,seedling_lg,invader,seed_num,sprout_num,seed_surv,arfa_0,g,conifer
+1,Quercus,Quercus alba,QUAL,White Oak,1,3,2,2,5,2,2,2,300.0,150.0,35.0,0.68,2.0,0.1,50.0,800.0,1200.0,1800.0,0.5,0.0,100.0,50.0,0.1,0.8,0.3,false
+2,Pinus,Pinus strobus,PIST,White Pine,2,2,3,3,4,3,1,1,250.0,120.0,40.0,0.35,1.5,0.15,40.0,600.0,1000.0,1600.0,0.3,0.0,200.0,0.0,0.05,0.9,0.4,true

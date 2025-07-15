@@ -1,0 +1,2 @@
+site_id,site_name,region,latitude,longitude,site_wmo,elevation,slope,A_field_cap,A_perm_wp,leaf_area_ind,base_h,leaf_area_w0,A0_w0,A_w0,sbase_w0,fire_prob,wind_prob,A0_c0,A0_n0,A_c0,A_n0,sbase_c0,sbase_n0,sigma,temp_lapse,prcp_lapse
+1,Test Site,Virginia,37.0,-78.0,123456,200.0,5.0,20.0,8.0,3.0,70.0,0.5,2.0,15.0,40.0,0.01,0.05,10.0,1.0,50.0,5.0,100.0,10.0,0.1,"0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6","0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1"

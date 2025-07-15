@@ -1,6 +1,7 @@
 project('test','fortran',
     version:'0.1')
 
+
 # Import the Python module
 py_mod = import('python')
 py = py_mod.find_installation(pure: false)
@@ -20,7 +21,8 @@ wrapper = custom_target('generate_wrapper',
         '--overwrite-signature',
         '-m', 'constants',
         '-h', '@OUTPUT@',
-        '@INPUT@']
+        '@INPUT@',
+        '--lower']
 )
 
 # Build the Python extension module using the generated wrapper
