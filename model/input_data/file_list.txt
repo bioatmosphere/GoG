@@ -1,6 +1,7 @@
-# UVAFME Input File List
-# Format: key=value
-species_file=species.csv
-site_file=sites.csv
-climate_file=climate.csv
-config_file=uvafme_config.json
+&filenames
+input_directory='input_data'
+output_directory='output_data'
+climate_directory='input_data'
+site_directory='input_data'
+sitelist_directory='input_data'
+/

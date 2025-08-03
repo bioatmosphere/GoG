@@ -36,44 +36,107 @@ class UVAFMEReader:
         
         with open(filepath, 'r', newline='') as csvfile:
             reader = csv.DictReader(csvfile)
-            for row in reader:
-                species = SpeciesData()
-                species.initialize_species(
-                    species_id=int(row['species_id']),
-                    genus_name=row['genus_name'],
-                    taxonomic_name=row['taxonomic_name'],
-                    unique_id=row['unique_id'],
-                    common_name=row['common_name'],
-                    genus_id=int(row['genus_id']),
-                    shade_tol=int(row['shade_tol']),
-                    lownutr_tol=int(row['lownutr_tol']),
-                    stress_tol=int(row['stress_tol']),
-                    age_tol=int(row['age_tol']),
-                    drought_tol=int(row['drought_tol']),
-                    flood_tol=int(row['flood_tol']),
-                    fire_tol=int(row['fire_tol']),
-                    max_age=float(row['max_age']),
-                    max_diam=float(row['max_diam']),
-                    max_ht=float(row['max_ht']),
-                    wood_bulk_dens=float(row['wood_bulk_dens']),
-                    rootdepth=float(row['rootdepth']),
-                    leafdiam_a=float(row['leafdiam_a']),
-                    leafarea_c=float(row['leafarea_c']),
-                    deg_day_min=float(row['deg_day_min']),
-                    deg_day_opt=float(row['deg_day_opt']),
-                    deg_day_max=float(row['deg_day_max']),
-                    seedling_lg=float(row['seedling_lg']),
-                    invader=float(row['invader']),
-                    seed_num=float(row['seed_num']),
-                    sprout_num=float(row['sprout_num']),
-                    seed_surv=float(row['seed_surv']),
-                    arfa_0=float(row['arfa_0']),
-                    g=float(row['g']),
-                    conifer=row['conifer'].lower() == 'true'
-                )
-                species_list.append(species)
+            
+            # Peek at first row to determine format
+            first_row = next(reader)
+            csvfile.seek(0)
+            reader = csv.DictReader(csvfile)
+            
+            if 'species_id' in first_row:
+                # New format
+                for row in reader:
+                    species = self._parse_new_format(row)
+                    species_list.append(species)
+            else:
+                # Original UVAFME format
+                for row in reader:
+                    species = self._parse_uvafme_format(row)
+                    species_list.append(species)
         
         return species_list
+    
+    def _parse_new_format(self, row):
+        """Parse species data from new format."""
+        species = SpeciesData()
+        species.initialize_species(
+            species_id=int(row['species_id']),
+            genus_name=row['genus_name'],
+            taxonomic_name=row['taxonomic_name'],
+            unique_id=row['unique_id'],
+            common_name=row['common_name'],
+            genus_id=int(row['genus_id']),
+            shade_tol=int(row['shade_tol']),
+            lownutr_tol=int(row['lownutr_tol']),
+            stress_tol=int(row['stress_tol']),
+            age_tol=int(row['age_tol']),
+            drought_tol=int(row['drought_tol']),
+            flood_tol=int(row['flood_tol']),
+            fire_tol=int(row['fire_tol']),
+            max_age=float(row['max_age']),
+            max_diam=float(row['max_diam']),
+            max_ht=float(row['max_ht']),
+            wood_bulk_dens=float(row['wood_bulk_dens']),
+            rootdepth=float(row['rootdepth']),
+            leafdiam_a=float(row['leafdiam_a']),
+            leafarea_c=float(row['leafarea_c']),
+            deg_day_min=float(row['deg_day_min']),
+            deg_day_opt=float(row['deg_day_opt']),
+            deg_day_max=float(row['deg_day_max']),
+            seedling_lg=float(row['seedling_lg']),
+            invader=float(row['invader']),
+            seed_num=float(row['seed_num']),
+            sprout_num=float(row['sprout_num']),
+            seed_surv=float(row['seed_surv']),
+            arfa_0=float(row['arfa_0']),
+            g=float(row['g']),
+            conifer=row['conifer'].lower() == 'true'
+        )
+        return species
+    
+    def _parse_uvafme_format(self, row):
+        """Parse species data from original UVAFME format."""
+        species = SpeciesData()
+        
+        # Map UVAFME columns to our format
+        genus_name = row['Genus'].strip("'")
+        taxonomic_name = row['Scientific name'].strip("'")
+        common_name = row['Common name'].strip("'")
+        unique_id = row['Species_code']
+        
+        species.initialize_species(
+            species_id=int(row['Individual']),
+            genus_name=genus_name,
+            taxonomic_name=taxonomic_name,
+            unique_id=unique_id,
+            common_name=common_name,
+            genus_id=int(row['Group']),
+            shade_tol=int(row['l']),  # light tolerance
+            lownutr_tol=int(row['n']),  # nutrient tolerance
+            stress_tol=int(row['stress']),
+            age_tol=int(row['old']),
+            drought_tol=int(row['d']),
+            flood_tol=int(row['f']),
+            fire_tol=int(row['fire']),
+            max_age=float(row['AGEmax']),
+            max_diam=float(row['DBHmax']),
+            max_ht=float(row['Hmax']),
+            wood_bulk_dens=float(row['bulk']),
+            rootdepth=2.0,  # Default since not in original
+            leafdiam_a=float(row['D_L']),
+            leafarea_c=float(row['L_C']),
+            deg_day_min=float(row['DEGDmin']),
+            deg_day_opt=float(row['DEGDoptimum']),
+            deg_day_max=float(row['DEGDmax']),
+            seedling_lg=float(row['NDS']),
+            invader=float(row['invader']),
+            seed_num=float(row['seed']),
+            sprout_num=float(row['sprout']),
+            seed_surv=float(row['NDE']),
+            arfa_0=float(row['s']),
+            g=float(row['g']),
+            conifer=int(row['evergreen']) == 1
+        )
+        return species
     
     def read_site_file(self, filename: str = "sites.csv") -> List[SiteData]:
         """Read site data from CSV file."""
@@ -86,45 +149,113 @@ class UVAFMEReader:
         
         with open(filepath, 'r', newline='') as csvfile:
             reader = csv.DictReader(csvfile)
-            for row in reader:
-                site = SiteData()
-                
-                # Parse temperature and precipitation lapse rates
-                temp_lapse = [float(x) for x in row['temp_lapse'].split(',')]
-                prcp_lapse = [float(x) for x in row['prcp_lapse'].split(',')]
-                
-                site.initialize_site(
-                    siteid=int(row['site_id']),
-                    sitename=row['site_name'],
-                    siteregion=row['region'],
-                    lat=float(row['latitude']),
-                    long=float(row['longitude']),
-                    wmo=float(row['site_wmo']),
-                    elevation=float(row['elevation']),
-                    slope=float(row['slope']),
-                    Afc=float(row['A_field_cap']),
-                    A_perm_wp=float(row['A_perm_wp']),
-                    lai=float(row['leaf_area_ind']),
-                    base_h=float(row['base_h']),
-                    lai_w0=float(row['leaf_area_w0']),
-                    A0_w0=float(row['A0_w0']),
-                    A_w0=float(row['A_w0']),
-                    sbase_w0=float(row['sbase_w0']),
-                    fire_prob=float(row['fire_prob']),
-                    wind_prob=float(row['wind_prob']),
-                    A0_c0=float(row['A0_c0']),
-                    A0_n0=float(row['A0_n0']),
-                    A_c0=float(row['A_c0']),
-                    A_n0=float(row['A_n0']),
-                    sbase_c0=float(row['sbase_c0']),
-                    sbase_n0=float(row['sbase_n0']),
-                    sigma=float(row['sigma']),
-                    temp_lapse=temp_lapse,
-                    prcp_lapse=prcp_lapse
-                )
-                sites_list.append(site)
+            
+            # Check format by looking at first row
+            first_row = next(reader)
+            csvfile.seek(0)
+            reader = csv.DictReader(csvfile)
+            
+            if 'site_id' in first_row:
+                # New format
+                for row in reader:
+                    sites_list.append(self._parse_new_site_format(row))
+            else:
+                # Original UVAFME format
+                for row in reader:
+                    if row['site']:  # Skip empty rows
+                        sites_list.append(self._parse_uvafme_site_format(row))
         
         return sites_list
+    
+    def _parse_new_site_format(self, row):
+        """Parse site data from new format."""
+        site = SiteData()
+        
+        # Parse temperature and precipitation lapse rates
+        temp_lapse = [float(x) for x in row['temp_lapse'].split(',')]
+        prcp_lapse = [float(x) for x in row['prcp_lapse'].split(',')]
+        
+        site.initialize_site(
+            siteid=int(row['site_id']),
+            sitename=row['site_name'],
+            siteregion=row['region'],
+            lat=float(row['latitude']),
+            long=float(row['longitude']),
+            wmo=float(row['site_wmo']),
+            elevation=float(row['elevation']),
+            slope=float(row['slope']),
+            Afc=float(row['A_field_cap']),
+            A_perm_wp=float(row['A_perm_wp']),
+            lai=float(row['leaf_area_ind']),
+            base_h=float(row['base_h']),
+            lai_w0=float(row['leaf_area_w0']),
+            A0_w0=float(row['A0_w0']),
+            A_w0=float(row['A_w0']),
+            sbase_w0=float(row['sbase_w0']),
+            fire_prob=float(row['fire_prob']),
+            wind_prob=float(row['wind_prob']),
+            A0_c0=float(row['A0_c0']),
+            A0_n0=float(row['A0_n0']),
+            A_c0=float(row['A_c0']),
+            A_n0=float(row['A_n0']),
+            sbase_c0=float(row['sbase_c0']),
+            sbase_n0=float(row['sbase_n0']),
+            sigma=float(row['sigma']),
+            temp_lapse=temp_lapse,
+            prcp_lapse=prcp_lapse
+        )
+        return site
+    
+    def _parse_uvafme_site_format(self, row):
+        """Parse site data from original UVAFME format."""
+        site = SiteData()
+        
+        # Parse temperature lapse rates (monthly)
+        temp_lapse = [
+            float(row['tmp_lapse_jan']), float(row['tmp_lapse_feb']), float(row['tmp_lapse_mar']),
+            float(row['tmp_lapse_apr']), float(row['tmp_lapse_may']), float(row['tmp_lapse_jun']),
+            float(row['tmp_lapse_jul']), float(row['tmp_lapse_aug']), float(row['tmp_lapse_sep']),
+            float(row['tmp_lapse_oct']), float(row['tmp_lapse_nov']), float(row['tmp_lapse_dec'])
+        ]
+        
+        # Parse precipitation lapse rates (monthly)
+        prcp_lapse = [
+            float(row['prcp_lapse_jan']), float(row['prcp_lapse_feb']), float(row['prcp_lapse_mar']),
+            float(row['prcp_lapse_apr']), float(row['prcp_lapse_may']), float(row['prcp_lapse_jun']),
+            float(row['prcp_lapse_jul']), float(row['prcp_lapse_aug']), float(row['prcp_lapse_sep']),
+            float(row['prcp_lapse_oct']), float(row['prcp_lapse_nov']), float(row['prcp_lapse_dec'])
+        ]
+        
+        site.initialize_site(
+            siteid=int(row['site']),
+            sitename=row['name'],
+            siteregion=row['region'],
+            lat=float(row['latitude']),
+            long=float(row['longitude']),
+            wmo=float(row['wmo']),
+            elevation=float(row['elevation']),
+            slope=float(row['slope']),
+            Afc=float(row['soilA_field_cap']),
+            A_perm_wp=float(row['soilA_perm_wp']),
+            lai=float(row['lai']),
+            base_h=float(row['soil_base_h']),
+            lai_w0=float(row['lai_w0']),
+            A0_w0=float(row['soilAO_w0']),
+            A_w0=float(row['soilA_w0']),
+            sbase_w0=float(row['sbase_w0']),
+            fire_prob=float(row['fire_prob']),
+            wind_prob=float(row['wind_prob']),
+            A0_c0=float(row['soilAO_c0']),
+            A0_n0=float(row['soilAO_n0']),
+            A_c0=float(row['soilA_c0']),
+            A_n0=float(row['soilA_n0']),
+            sbase_c0=float(row['sbase_c0']),
+            sbase_n0=float(row['sbase_n0']),
+            sigma=float(row['sigma']),
+            temp_lapse=temp_lapse,
+            prcp_lapse=prcp_lapse
+        )
+        return site
     
     def read_climate_file(self, filename: str = "climate.csv") -> Dict[int, Dict[str, np.ndarray]]:
         """Read climate data from CSV file."""
@@ -137,29 +268,86 @@ class UVAFMEReader:
         
         with open(filepath, 'r', newline='') as csvfile:
             reader = csv.DictReader(csvfile)
-            for row in reader:
-                site_id = int(row['site_id'])
-                
-                # Parse monthly data
-                tmin = [float(row[f'tmin_{i}']) for i in range(1, 13)]
-                tmax = [float(row[f'tmax_{i}']) for i in range(1, 13)]
-                precip = [float(row[f'precip_{i}']) for i in range(1, 13)]
-                
-                # Optional standard deviations
-                tmin_std = [float(row.get(f'tmin_std_{i}', 0)) for i in range(1, 13)]
-                tmax_std = [float(row.get(f'tmax_std_{i}', 0)) for i in range(1, 13)]
-                precip_std = [float(row.get(f'precip_std_{i}', 0)) for i in range(1, 13)]
-                
-                climate_data[site_id] = {
-                    'tmin': np.array(tmin),
-                    'tmax': np.array(tmax),
-                    'precip': np.array(precip),
-                    'tmin_std': np.array(tmin_std),
-                    'tmax_std': np.array(tmax_std),
-                    'precip_std': np.array(precip_std)
-                }
+            
+            # Check format by looking at first row
+            first_row = next(reader)
+            csvfile.seek(0)
+            reader = csv.DictReader(csvfile)
+            
+            if 'site_id' in first_row:
+                # New format
+                for row in reader:
+                    climate_data.update(self._parse_new_climate_format(row))
+            else:
+                # Original UVAFME format
+                for row in reader:
+                    if row['site']:  # Skip empty rows
+                        climate_data.update(self._parse_uvafme_climate_format(row))
         
         return climate_data
+    
+    def _parse_new_climate_format(self, row):
+        """Parse climate data from new format."""
+        site_id = int(row['site_id'])
+        
+        # Parse monthly data
+        tmin = [float(row[f'tmin_{i}']) for i in range(1, 13)]
+        tmax = [float(row[f'tmax_{i}']) for i in range(1, 13)]
+        precip = [float(row[f'precip_{i}']) for i in range(1, 13)]
+        
+        # Optional standard deviations
+        tmin_std = [float(row.get(f'tmin_std_{i}', 0)) for i in range(1, 13)]
+        tmax_std = [float(row.get(f'tmax_std_{i}', 0)) for i in range(1, 13)]
+        precip_std = [float(row.get(f'precip_std_{i}', 0)) for i in range(1, 13)]
+        
+        return {site_id: {
+            'tmin': np.array(tmin),
+            'tmax': np.array(tmax),
+            'precip': np.array(precip),
+            'tmin_std': np.array(tmin_std),
+            'tmax_std': np.array(tmax_std),
+            'precip_std': np.array(precip_std)
+        }}
+    
+    def _parse_uvafme_climate_format(self, row):
+        """Parse climate data from original UVAFME format."""
+        site_id = int(row['site'])
+        
+        # Parse monthly temperature data
+        tmin = [
+            float(row['tmin_jan']), float(row['tmin_feb']), float(row['tmin_mar']),
+            float(row['tmin_apr']), float(row['tmin_may']), float(row['tmin_jun']),
+            float(row['tmin_jul']), float(row['tmin_aug']), float(row['tmin_sep']),
+            float(row['tmin_oct']), float(row['tmin_nov']), float(row['tmin_dec'])
+        ]
+        
+        tmax = [
+            float(row['tmax_jan']), float(row['tmax_feb']), float(row['tmax_mar']),
+            float(row['tmax_apr']), float(row['tmax_may']), float(row['tmax_jun']),
+            float(row['tmax_jul']), float(row['tmax_aug']), float(row['tmax_sep']),
+            float(row['tmax_oct']), float(row['tmax_nov']), float(row['tmax_dec'])
+        ]
+        
+        precip = [
+            float(row['prcp_jan']), float(row['prcp_feb']), float(row['prcp_mar']),
+            float(row['prcp_apr']), float(row['prcp_may']), float(row['prcp_jun']),
+            float(row['prcp_jul']), float(row['prcp_aug']), float(row['prcp_sep']),
+            float(row['prcp_oct']), float(row['prcp_nov']), float(row['prcp_dec'])
+        ]
+        
+        # Standard deviations default to 0 for original format
+        tmin_std = [0.0] * 12
+        tmax_std = [0.0] * 12
+        precip_std = [0.0] * 12
+        
+        return {site_id: {
+            'tmin': np.array(tmin),
+            'tmax': np.array(tmax),
+            'precip': np.array(precip),
+            'tmin_std': np.array(tmin_std),
+            'tmax_std': np.array(tmax_std),
+            'precip_std': np.array(precip_std)
+        }}
     
     def read_filelist(self, filename: str = "filelist.txt") -> Dict[str, str]:
         """Read file list configuration."""

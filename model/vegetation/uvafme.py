@@ -35,14 +35,14 @@ class UVAFMEModel:
         # Read configuration files
         if filelist:
             file_config = self.reader.read_filelist(filelist)
-            species_file = file_config.get('species_file', 'species.csv')
-            site_file = file_config.get('site_file', 'sites.csv')
-            climate_file = file_config.get('climate_file', 'climate.csv')
+            species_file = file_config.get('species_file', 'UVAFME2012_specieslist.csv')
+            site_file = file_config.get('site_file', 'UVAFME2012_site.csv')
+            climate_file = file_config.get('climate_file', 'UVAFME2012_climate.csv')
             config_file = file_config.get('config_file', 'uvafme_config.json')
         else:
-            species_file = 'species.csv'
-            site_file = 'sites.csv'
-            climate_file = 'climate.csv'
+            species_file = 'UVAFME2012_specieslist.csv'
+            site_file = 'UVAFME2012_site.csv'
+            climate_file = 'UVAFME2012_climate.csv'
             config_file = 'uvafme_config.json'
         
         # Load parameters
