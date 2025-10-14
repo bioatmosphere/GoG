@@ -4,10 +4,10 @@ Translated from Tree.f90
 """
 
 import math
-import random
 import numpy as np
 from .constants import *
 from .species import SpeciesData
+from .random_utils import urand
 
 
 # Constants global within this module
@@ -59,6 +59,14 @@ class TreeData(SpeciesData):
         for attr in dir(species):
             if not attr.startswith('_') and hasattr(self, attr):
                 setattr(self, attr, getattr(species, attr))
+        
+        # Debug: Ensure environmental factors are copied
+        if hasattr(species, 'fc_degday'):
+            self.fc_degday = species.fc_degday
+        if hasattr(species, 'fc_drought'):
+            self.fc_drought = species.fc_drought  
+        if hasattr(species, 'fc_flood'):
+            self.fc_flood = species.fc_flood
     
     def copy_tree(self, tree):
         """Copy tree data from another tree."""
@@ -141,8 +149,11 @@ class TreeData(SpeciesData):
     
     def lai_biomass_c(self):
         """Calculate leaf area index biomass carbon."""
-        dc = self.diam_canht
+        dc = self.diam_canht  # diameter in cm
         leafd_a = self.leafdiam_a
+
+        # Keep formula as-is matching Fortran
+        # dc is in cm, result is used for LAI calculations
         return dc * dc * leafd_a
     
     def stem_biomass_c(self, tree_0):
@@ -168,11 +179,24 @@ class TreeData(SpeciesData):
         """Check survival based on age tolerance."""
         check = [4.605, 6.908, 11.51]  # PER 1%, 0.1%, 0.001%
         
-        k = self.age_tol - 1  # Adjust for 0-based indexing
+        k = max(0, min(len(check) - 1, self.age_tol - 1))  # Clamp to valid range
         agemax = self.max_age
         
-        rand_val = random.random()
-        if rand_val < (check[k] / agemax):
+        if agemax <= 0:
+            return True  # Can't die of age if max_age is invalid
+        
+        rand_val = urand()
+        mort_prob = check[k] / agemax
+        
+        # DEBUG: Print survival details for first few trees
+        # if hasattr(self, '_debug_count') and self._debug_count < 3:
+        #     print(f"DEBUG age_survival: age_tol={self.age_tol}, k={k}, agemax={agemax}, check[k]={check[k]}, mort_prob={mort_prob:.4f}, rand={rand_val:.4f}")
+        #     self._debug_count += 1
+        # elif not hasattr(self, '_debug_count'):
+        #     self._debug_count = 1
+        #     print(f"DEBUG age_survival: age_tol={self.age_tol}, k={k}, agemax={agemax}, check[k]={check[k]}, mort_prob={mort_prob:.4f}, rand={rand_val:.4f}")
+        
+        if rand_val < mort_prob:
             return False
         else:
             return True
@@ -181,8 +205,16 @@ class TreeData(SpeciesData):
         """Check survival based on growth stress tolerance."""
         check = [0.31, 0.34, 0.37, 0.40, 0.43]  # 5%, 10%, 20%, 40%, 80% years
         
-        k = self.stress_tol - 1  # Adjust for 0-based indexing
-        rand_val = random.random()
+        k = max(0, min(len(check) - 1, self.stress_tol - 1))  # Clamp to valid range
+        rand_val = urand()
+        
+        # DEBUG: Print survival details for first few trees
+        # if hasattr(self, '_debug_growth_count') and self._debug_growth_count < 3:
+        #     print(f"DEBUG growth_survival: stress_tol={self.stress_tol}, k={k}, check[k]={check[k]}, mort_marker={self.mort_marker}, rand={rand_val:.4f}")
+        #     self._debug_growth_count += 1
+        # elif not hasattr(self, '_debug_growth_count'):
+        #     self._debug_growth_count = 1
+        #     print(f"DEBUG growth_survival: stress_tol={self.stress_tol}, k={k}, check[k]={check[k]}, mort_marker={self.mort_marker}, rand={rand_val:.4f}")
         
         if self.mort_marker and rand_val < check[k]:
             return False
@@ -229,18 +261,18 @@ class TreeData(SpeciesData):
         """Calculate all tree metrics in proper order."""
         # Calculate height first
         self.forska_height()
-        
+
         # Calculate stem shape
         self.stem_shape()
-        
+
         # Calculate biomass components
         self.biomass_c()
         self.biomass_n()
         self.leaf_biomass_c()
-        
+
         # Calculate growth potential
         self.max_growth()
-    
+
     def is_alive(self):
         """Check if tree is alive based on survival factors."""
         if not self.age_survival():

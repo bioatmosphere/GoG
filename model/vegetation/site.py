@@ -62,6 +62,11 @@ class SiteData:
         self.freeze = 0.0
         self.fire_prob = 0.0
         self.wind_prob = 0.0
+
+        # Daily climate arrays (365 days)
+        self.daily_tmin = np.zeros(365)
+        self.daily_tmax = np.zeros(365)
+        self.daily_precip = np.zeros(365)
     
     def initialize_site(self, siteid, sitename, siteregion, lat, long, wmo,
                        elevation, slope, Afc, A_perm_wp, lai, base_h,
@@ -84,8 +89,9 @@ class SiteData:
         self.precip_lapse_r = np.array(prcp_lapse)
         self.leaf_area_w0 = lai_w0
         self.leaf_area_ind = lai
-        self.fire_prob = fire_prob
-        self.wind_prob = wind_prob
+        # Convert fire/wind probabilities from per-1000-years to annual (like Fortran)
+        self.fire_prob = fire_prob / 1000.0
+        self.wind_prob = wind_prob / 1000.0
         
         # Initialize soil properties
         self.soil.A_field_cap = Afc

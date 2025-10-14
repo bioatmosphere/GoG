@@ -14,6 +14,83 @@ from .site import SiteData
 from .parameters import Parameters
 
 
+def count_records(file_handle, nheaders: int = 0) -> int:
+    """
+    Count the number of records in a file, excluding headers.
+
+    Args:
+        file_handle: Open file handle or file path
+        nheaders: Number of header lines to skip
+
+    Returns:
+        Number of data records
+    """
+    if isinstance(file_handle, str):
+        with open(file_handle, 'r') as f:
+            return count_records(f, nheaders)
+
+    # Save current position
+    current_pos = file_handle.tell()
+
+    # Go to beginning
+    file_handle.seek(0)
+
+    # Count lines
+    line_count = 0
+    for line in file_handle:
+        line_count += 1
+
+    # Restore position
+    file_handle.seek(current_pos)
+
+    return max(0, line_count - nheaders)
+
+
+def split_line(line: str) -> List[str]:
+    """
+    Split a line by commas and return fields.
+
+    Args:
+        line: Input line to split
+
+    Returns:
+        List of fields
+    """
+    # Strip whitespace and split by comma
+    line = line.strip()
+    if not line:
+        return []
+
+    # Simple CSV splitting - could be enhanced for quoted fields
+    fields = [field.strip() for field in line.split(',')]
+    return fields
+
+
+def quote_strip(string: str) -> str:
+    """
+    Remove quotes (single or double) from a string.
+
+    Args:
+        string: Input string
+
+    Returns:
+        String with quotes removed
+    """
+    return string.strip().strip('"').strip("'")
+
+
+def warning(message: str):
+    """Print a warning message."""
+    print(f"Warning: {message}")
+
+
+def fatal_error(message: str):
+    """Print an error message and exit."""
+    print(f"Fatal Error: {message}")
+    import sys
+    sys.exit(1)
+
+
 class UVAFMEReader:
     """Handles reading of UVAFME input files."""
     
@@ -377,7 +454,7 @@ class UVAFMEReader:
                 'drought_tol': 2, 'flood_tol': 2, 'fire_tol': 2, 'max_age': 300.0,
                 'max_diam': 150.0, 'max_ht': 35.0, 'wood_bulk_dens': 0.68,
                 'rootdepth': 2.0, 'leafdiam_a': 0.1, 'leafarea_c': 50.0,
-                'deg_day_min': 800.0, 'deg_day_opt': 1200.0, 'deg_day_max': 1800.0,
+                'deg_day_min': 1000.0, 'deg_day_opt': 2500.0, 'deg_day_max': 4000.0,
                 'seedling_lg': 0.5, 'invader': 0.0, 'seed_num': 100.0,
                 'sprout_num': 50.0, 'seed_surv': 0.1, 'arfa_0': 0.8, 'g': 0.3,
                 'conifer': 'false'
@@ -389,7 +466,7 @@ class UVAFMEReader:
                 'drought_tol': 3, 'flood_tol': 1, 'fire_tol': 1, 'max_age': 250.0,
                 'max_diam': 120.0, 'max_ht': 40.0, 'wood_bulk_dens': 0.35,
                 'rootdepth': 1.5, 'leafdiam_a': 0.15, 'leafarea_c': 40.0,
-                'deg_day_min': 600.0, 'deg_day_opt': 1000.0, 'deg_day_max': 1600.0,
+                'deg_day_min': 1200.0, 'deg_day_opt': 2800.0, 'deg_day_max': 4200.0,
                 'seedling_lg': 0.3, 'invader': 0.0, 'seed_num': 200.0,
                 'sprout_num': 0.0, 'seed_surv': 0.05, 'arfa_0': 0.9, 'g': 0.4,
                 'conifer': 'true'
@@ -458,8 +535,23 @@ config_file=uvafme_config.json
 class UVAFMEWriter:
     """Handles writing of UVAFME output files."""
     
-    def __init__(self, base_path: str = "output_data"):
-        self.base_path = base_path
+    def __init__(self, base_path: str = None):
+        # Support multiple possible locations for output_data directory
+        if base_path is None:
+            possible_output_paths = ['output_data', '../output_data', '../../output_data']
+            self.base_path = None
+
+            for path in possible_output_paths:
+                if os.path.exists(path):
+                    self.base_path = path
+                    break
+
+            # If none exist, use '../output_data' as the preferred default
+            if self.base_path is None:
+                self.base_path = '../output_data'
+        else:
+            self.base_path = base_path
+
         self.ensure_directories()
         self.output_files = {}
     

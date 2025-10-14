@@ -39,10 +39,12 @@ def cov365(ta1):
             vta[md] = ta[k] + tyxd * float(md - ltmt[k])
     
     result = np.zeros(365)
-    for md in range(16, 365):
+    # Fortran: do md=16,365 (1-based) → Python: range(15, 365) (0-based, indices 15-364)
+    for md in range(15, 365):
         result[md] = vta[md]
-    
-    for md in range(1, 16):
+
+    # Fortran: do md=1,15 (1-based) → Python: range(0, 15) (0-based, indices 0-14)
+    for md in range(0, 15):
         result[md] = vta[365 + md]
     
     return result

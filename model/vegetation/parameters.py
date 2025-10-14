@@ -56,7 +56,7 @@ class Parameters:
         self.tree_level_data = False
         
         # Plot parameters
-        self.plotsize = 1.0  # hectares
+        self.plotsize = 500.0  # square meters (m²) - matches UVAFME2012_runtime.txt
         self.rootdepth = 2.0  # meters
         
         # Variables for changes to all site values
@@ -75,6 +75,11 @@ class Parameters:
         """Load parameters from a JSON configuration file."""
         if os.path.exists(filename):
             with open(filename, 'r') as f:
+                config = json.load(f)
+                self.load_from_dict(config)
+        elif os.path.exists(os.path.join("input_data/", filename)):
+            alt_path = os.path.join("input_data/", filename)
+            with open(alt_path, 'r') as f:
                 config = json.load(f)
                 self.load_from_dict(config)
         else:

@@ -49,10 +49,10 @@ class PlotData:
         self.seedling_number = 0.0
         
         # Initialize species-based arrays
-        self.seedling = np.zeros(self.numspecies)
-        self.seedbank = np.zeros(self.numspecies)
         self.avail_spec = np.zeros(self.numspecies)
         self.nutrient = np.ones(self.numspecies)
+        self.seedbank = np.zeros(self.numspecies)
+        self.seedling = np.zeros(self.numspecies)
         
         # Copy species list
         self.species = species.copy()
@@ -89,8 +89,19 @@ class PlotData:
         """Calculate diameter categories for specified genera or species."""
         numitems = len(genera)
         diam_categories = np.zeros((numitems, NHC), dtype=int)
-        
+
         for ig, genus in enumerate(genera):
+            # Extract the comparison value based on field type
+            if field == "genus":
+                # For genus, genera contains just genus names (strings)
+                match_value = genus
+            elif field == "species":
+                # For species, genera contains tuples of (genus_name, species_id)
+                # Extract just the species_id
+                match_value = genus[1] if isinstance(genus, tuple) else genus
+            else:
+                continue
+
             for tree in self.trees:
                 if field == "genus":
                     comp = tree.genus_name
@@ -98,11 +109,11 @@ class PlotData:
                     comp = tree.unique_id
                 else:
                     continue
-                
-                if comp == genus:
+
+                if comp == match_value:
                     tree_diams = tree.get_diam_category()
                     diam_categories[ig, :] += tree_diams
-        
+
         return diam_categories
     
     def sum_over_sg(self, genera: List[str], field: str = "genus") -> Dict[str, np.ndarray]:
@@ -124,7 +135,18 @@ class PlotData:
         for is_idx, genus in enumerate(genera):
             biomC_sum_sq = 0.0
             biomN_sum_sq = 0.0
-            
+
+            # Extract the comparison value based on field type
+            if field == "genus":
+                # For genus, genera contains just genus names (strings)
+                match_value = genus
+            elif field == "species":
+                # For species, genera contains tuples of (genus_name, species_id)
+                # Extract just the species_id
+                match_value = genus[1] if isinstance(genus, tuple) else genus
+            else:
+                continue
+
             for tree in self.trees:
                 if field == "genus":
                     comp = tree.genus_name
@@ -132,8 +154,8 @@ class PlotData:
                     comp = tree.unique_id
                 else:
                     continue
-                
-                if comp == genus:
+
+                if comp == match_value:
                     n[is_idx] += 1
                     
                     # Determine leaf C/N ratio
@@ -163,8 +185,11 @@ class PlotData:
                 biomN_std[is_idx] = 0.0
             else:
                 ni = 1.0 / float(n[is_idx] - 1) if n[is_idx] > 1 else 0.0
-                biomC_std[is_idx] = math.sqrt((biomC_sum_sq - biomC[is_idx]**2 / n[is_idx]) * ni)
-                biomN_std[is_idx] = math.sqrt((biomN_sum_sq - biomN[is_idx]**2 / n[is_idx]) * ni)
+                # Protect against negative variance due to floating point errors
+                var_c = max(0.0, (biomC_sum_sq - biomC[is_idx]**2 / n[is_idx]) * ni)
+                var_n = max(0.0, (biomN_sum_sq - biomN[is_idx]**2 / n[is_idx]) * ni)
+                biomC_std[is_idx] = math.sqrt(var_c)
+                biomN_std[is_idx] = math.sqrt(var_n)
         
         return {
             'basal_area': basal_area,
@@ -208,6 +233,16 @@ class PlotData:
             if species.unique_id == unique_id:
                 return species
         return None
+    
+    def get_canopy_shading(self, height: float) -> float:
+        """Get canopy shading at a given height."""
+        height_idx = min(int(height), len(self.con_light) - 1)
+        # Return average of conifer and deciduous light availability
+        # Convert from light availability to shading (1 - availability)
+        con_light = self.con_light[height_idx] if height_idx < len(self.con_light) else 0.0
+        dec_light = self.dec_light[height_idx] if height_idx < len(self.dec_light) else 0.0
+        avg_light = (con_light + dec_light) / 2.0
+        return 1.0 - avg_light  # Convert to shading
     
     def get_total_biomass(self) -> Tuple[float, float]:
         """Get total carbon and nitrogen biomass."""

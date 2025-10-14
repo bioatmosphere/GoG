@@ -48,7 +48,15 @@ H_COEFF = 0.000093876
 H_ADDON = 17.8
 
 # Climate related constants
-NTEMPS = 12
+NTEMPS = 12  # Number of temperature/precipitation values (monthly)
+
+# Tree diameter categories
+NHC = 7  # Number of height categories
+
+# Values for invalid/missing data
+RNVALID = -999.0  # Real invalid value
+INVALID = -999    # Integer invalid value
+
 MAX_DAYS_PER_YEAR = 366
 DAYS_PER_YEAR = 365
 
