@@ -1,0 +1,3 @@
+[submodule "DEMENTpy"]
+	path = DEMENTpy
+	url = https://github.com/DEMENT-Model/DEMENTpy.git
