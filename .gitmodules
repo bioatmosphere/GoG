@@ -1,3 +1,3 @@
 [submodule "DEMENTpy"]
-	path = DEMENTpy
+	path = model/microbiome/DEMENTpy
 	url = https://github.com/DEMENT-Model/DEMENTpy.git
