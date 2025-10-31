@@ -10,7 +10,7 @@ Theoretical and empirical research have established a view of ecosystems and the
 The GoGs framework integrates two major model components:
 
 ### 1. **GAPPY** (Vegetation Model)
-- Python translation of UVAFME (University of Virginia Forest Model Enhanced)
+- Based on [GAPpy](https://github.com/bioatmosphere/GAPpy.git)
 - Located in `model/vegetation/`
 - Simulates forest gap dynamics, tree growth, species competition, and succession
 - Provides litter inputs (leaf, woody debris) to the microbiome model
@@ -154,9 +154,8 @@ This is an active research project integrating vegetation and microbiome models.
 
 ## References
 
-- **UVAFME/GAPPY**: Original Fortran-based forest gap model
+- **GAPPY**: [GitHub Repository](https://github.com/bioatmosphere/GAPpy.git)
 - **DEMENTpy**: [GitHub Repository](https://github.com/DEMENT-Model/DEMENTpy)
-- **Pattern, Diversity, Process (PDP) Framework**: See manuscript in `manuscript/`
 
 ## Citation
 
