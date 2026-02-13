@@ -3,7 +3,7 @@ import sys
 import numpy as np
 
 # Import the Python vegetation model modules
-from vegetation import UVAFMEModel, CODENAME, VERSION_ID
+from vegetation import GAPPYModel, CODENAME, VERSION_ID
 
 def main():
     """Main entry point for the vegetation model."""
@@ -12,7 +12,7 @@ def main():
     print("=" * 80)
     
     # Create and run the model
-    model = UVAFMEModel()
+    model = GAPPYModel()
     
     # You can pass a filelist if needed
     filelist = ""

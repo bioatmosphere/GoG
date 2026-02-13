@@ -1,5 +1,5 @@
 """
-Parameters module for UVAFME vegetation model.
+Parameters module for GAPPY vegetation model.
 Translated from Parameters.f90
 """
 
@@ -10,7 +10,7 @@ from .constants import *
 
 
 class Parameters:
-    """Global parameters for UVAFME model."""
+    """Global parameters for GAPPY model."""
     
     def __init__(self):
         # Basic parameters
@@ -70,6 +70,10 @@ class Parameters:
         # Counters
         self.clim_counter = 0
         self.rand_counter = 0
+
+        # DEMENTpy integration parameters
+        self.use_dement = False  # Use mechanistic soil decomposition
+        self.dement_spatial_mode = 'aggregated'  # 'aggregated' or 'one_to_one'
     
     def load_from_file(self, filename: str):
         """Load parameters from a JSON configuration file."""
@@ -141,10 +145,12 @@ class Parameters:
             'wind_level': self.wind_level,
             'SA_field_cap': self.SA_field_cap,
             'A0_level_C': self.A0_level_C,
-            'A0_level_N': self.A0_level_N
+            'A0_level_N': self.A0_level_N,
+            'use_dement': self.use_dement,
+            'dement_spatial_mode': self.dement_spatial_mode
         }
     
-    def create_default_config(self, filename: str = "uvafme_config.json"):
+    def create_default_config(self, filename: str = "gappy_config.json"):
         """Create a default configuration file."""
         default_config = {
             "numyears": 100,

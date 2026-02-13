@@ -1,5 +1,5 @@
 """
-Climate module for UVAFME vegetation model.
+Climate module for GAPPY vegetation model.
 Translated from Climate.f90
 """
 

@@ -1,5 +1,5 @@
 """
-Model module for UVAFME vegetation model.
+Model module for GAPPY vegetation model.
 Orchestrates biogeochemical processes, forest dynamics, and ecosystem interactions.
 """
 
@@ -65,6 +65,9 @@ class ForestModel:
         tmax_with_var = np.zeros(12)
         precip_with_var = np.zeros(12)
 
+        # Calculate atmospheric N deposition from monthly precipitation (Fortran Model.f90:124)
+        rain_n = 0.0
+
         for month in range(12):
             # Generate random fluctuation factors
             temp_f = clim_nrand(0.0, 1.0)
@@ -87,6 +90,9 @@ class ForestModel:
             tmax_with_var[month] = site.tmax[month] + temp_f * site.tmax_std[month]
             precip_with_var[month] = max(site.precip[month] + prcp_f * site.precip_std[month], 0.0)
 
+            # Accumulate atmospheric N deposition from monthly precip (matches Fortran)
+            rain_n += precip_with_var[month] * PRCP_N
+
         # Convert monthly temperature to daily (using climate with variability)
         daily_tmin = cov365(tmin_with_var)
         daily_tmax = cov365(tmax_with_var)
@@ -98,6 +104,9 @@ class ForestModel:
         site.daily_tmin = daily_tmin
         site.daily_tmax = daily_tmax
         site.daily_precip = daily_precip / 10.0  # Convert mm to cm
+
+        # Store atmospheric N deposition (calculated from monthly precip)
+        site.rain_n = rain_n
 
         # Calculate daily averages for the year
         site.rain = np.mean(daily_precip) / 10.0  # Convert to cm/day
@@ -261,6 +270,9 @@ class ForestModel:
             saw0_scaled = water_results[7]  # saw0_scaled_by_fc
             sbw0_scaled = water_results[5]  # sbw0_scaled_by_max
 
+            # Update canopy water content (critical for flood_days calculation!)
+            site.leaf_area_w0 = water_results[9]  # Updated lai_w0
+
             # Process soil decomposition with daily inputs
             avail_N, C_resp = site.soil.soil_decomp(
                 daily_litter_c1, daily_litter_c2, daily_litter_n1, daily_litter_n2,
@@ -272,9 +284,9 @@ class ForestModel:
             total_avail_N += max(avail_N, 0.0)
             total_act_evap += act_ev_day
 
-        # Store annual totals (matches Fortran line 186)
+        # Store annual totals (matches Fortran line 186, 225)
         site.soil.total_C_rsp = total_C_resp
-        site.soil.avail_N = total_avail_N
+        site.soil.avail_N = total_avail_N + site.rain_n  # Add atmospheric N from monthly precip
         site.act_evap_day = total_act_evap / days_per_year  # Average daily evap
 
         # Calculate final water stress indicators from last day's state

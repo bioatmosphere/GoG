@@ -1,4 +1,4 @@
-&uvafme
+&gappy
 ! variables that can be changed
 !incr/decr variables are total change, and both should be positive
 !incr_tmin_by=4

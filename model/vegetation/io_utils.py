@@ -1,5 +1,5 @@
 """
-Input/Output utilities for UVAFME vegetation model.
+Input/Output utilities for GAPPY vegetation model.
 Handles reading and writing of climate, species, and site data.
 """
 
@@ -91,8 +91,8 @@ def fatal_error(message: str):
     sys.exit(1)
 
 
-class UVAFMEReader:
-    """Handles reading of UVAFME input files."""
+class GAPPYReader:
+    """Handles reading of GAPPY input files."""
     
     def __init__(self, base_path: str = "input_data"):
         self.base_path = base_path
@@ -125,9 +125,9 @@ class UVAFMEReader:
                     species = self._parse_new_format(row)
                     species_list.append(species)
             else:
-                # Original UVAFME format
+                # Original GAPPY format
                 for row in reader:
-                    species = self._parse_uvafme_format(row)
+                    species = self._parse_gappy_format(row)
                     species_list.append(species)
         
         return species_list
@@ -170,11 +170,11 @@ class UVAFMEReader:
         )
         return species
     
-    def _parse_uvafme_format(self, row):
-        """Parse species data from original UVAFME format."""
+    def _parse_gappy_format(self, row):
+        """Parse species data from original GAPPY format."""
         species = SpeciesData()
         
-        # Map UVAFME columns to our format
+        # Map GAPPY columns to our format
         genus_name = row['Genus'].strip("'")
         taxonomic_name = row['Scientific name'].strip("'")
         common_name = row['Common name'].strip("'")
@@ -237,10 +237,10 @@ class UVAFMEReader:
                 for row in reader:
                     sites_list.append(self._parse_new_site_format(row))
             else:
-                # Original UVAFME format
+                # Original GAPPY format
                 for row in reader:
                     if row['site']:  # Skip empty rows
-                        sites_list.append(self._parse_uvafme_site_format(row))
+                        sites_list.append(self._parse_gappy_site_format(row))
         
         return sites_list
     
@@ -283,8 +283,8 @@ class UVAFMEReader:
         )
         return site
     
-    def _parse_uvafme_site_format(self, row):
-        """Parse site data from original UVAFME format."""
+    def _parse_gappy_site_format(self, row):
+        """Parse site data from original GAPPY format."""
         site = SiteData()
         
         # Parse temperature lapse rates (monthly)
@@ -356,10 +356,10 @@ class UVAFMEReader:
                 for row in reader:
                     climate_data.update(self._parse_new_climate_format(row))
             else:
-                # Original UVAFME format
+                # Original GAPPY format
                 for row in reader:
                     if row['site']:  # Skip empty rows
-                        climate_data.update(self._parse_uvafme_climate_format(row))
+                        climate_data.update(self._parse_gappy_climate_format(row))
         
         return climate_data
     
@@ -386,8 +386,8 @@ class UVAFMEReader:
             'precip_std': np.array(precip_std)
         }}
     
-    def _parse_uvafme_climate_format(self, row):
-        """Parse climate data from original UVAFME format."""
+    def _parse_gappy_climate_format(self, row):
+        """Parse climate data from original GAPPY format."""
         site_id = int(row['site'])
         
         # Parse monthly temperature data
@@ -521,19 +521,19 @@ class UVAFMEReader:
     
     def create_example_filelist(self, filepath: str):
         """Create example filelist file."""
-        example_filelist = """# UVAFME Input File List
+        example_filelist = """# GAPPY Input File List
 # Format: key=value
 species_file=species.csv
 site_file=sites.csv
 climate_file=climate.csv
-config_file=uvafme_config.json
+config_file=gappy_config.json
 """
         with open(filepath, 'w') as f:
             f.write(example_filelist)
 
 
-class UVAFMEWriter:
-    """Handles writing of UVAFME output files."""
+class GAPPYWriter:
+    """Handles writing of GAPPY output files."""
     
     def __init__(self, base_path: str = None):
         # Support multiple possible locations for output_data directory

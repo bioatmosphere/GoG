@@ -1,5 +1,5 @@
 """
-Species module for UVAFME vegetation model.
+Species module for GAPPY vegetation model.
 Translated from Species.f90
 """
 

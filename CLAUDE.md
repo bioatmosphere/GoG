@@ -12,9 +12,9 @@ The codebase consists of three main components:
 
 ### 1. Vegetation Model (Fortran-based)
 - Located in `model/vegetation/src/`
-- Based on UVAFME (University of Virginia Forest Model Enhanced)
+- Based on GAPPY (University of Virginia Forest Model Enhanced)
 - Core Fortran modules: Climate, Species, Tree, Site, Soil, Model, etc.
-- Entry point: `UVAFME.f90`
+- Entry point: `GAPPY.f90`
 - Python interface built using f2py and Meson
 
 ### 2. Microbiome Model (Python-based)
@@ -90,7 +90,7 @@ python main.py
 
 ## Development Notes
 
-- The vegetation model is a port/adaptation of UVAFME
+- The vegetation model is a port/adaptation of GAPPY
 - Fortran-Python interface uses f2py for wrapping
 - No formal test suite currently exists
 - Input data includes climate, species, and site information

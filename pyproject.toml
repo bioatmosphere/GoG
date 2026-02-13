@@ -1,9 +1,14 @@
 [project]
 name = "gog"
 version = "0.1.0"
-description = "Add your description here"
+description = "GoGs: a Gap of Gaps ecosystem modelling framework"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
-    "numpy>=2.0.2",
+    "matplotlib>=3.9.4",
+    "meson>=1.7.2",
+    "numpy >1.25.2",
+    "pandas>=2.3.1",
+    "scipy>=1.13.1",
+    "seaborn>=0.13.2",
 ]

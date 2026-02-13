@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Utility to create default UVAFME configuration file.
+Utility to create default GAPPY configuration file.
 """
 
 import sys
@@ -10,10 +10,10 @@ sys.path.append('.')
 from vegetation import params
 
 def create_default_config():
-    """Create a default UVAFME configuration file."""
+    """Create a default GAPPY configuration file."""
     
     # Create config in current directory
-    config_file = "uvafme_config.json"
+    config_file = "gappy_config.json"
     params.create_default_config(config_file)
     
     # Also create in input_data directory

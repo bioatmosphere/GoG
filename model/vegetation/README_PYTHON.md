@@ -1,6 +1,6 @@
-# UVAFME Python Translation
+# GAPPY Python Translation
 
-This directory contains the Python translation of the UVAFME (University of Virginia Forest Model Enhanced) vegetation model, originally written in Fortran.
+This directory contains the Python translation of the GAPPY (University of Virginia Forest Model Enhanced) vegetation model, originally written in Fortran.
 
 ## Overview
 
@@ -11,7 +11,7 @@ The Python translation preserves the original model structure while making it mo
 - **site.py**: Site data structures and climate adjustment functions
 - **soil.py**: Soil biogeochemical processes and water balance
 - **climate.py**: Climate data processing and conversions
-- **uvafme.py**: Main model execution loop and orchestration
+- **gappy.py**: Main model execution loop and orchestration
 
 ## Key Features
 
@@ -39,7 +39,7 @@ The Python translation preserves the original model structure while making it mo
    - Extraterrestrial radiation (`ex_rad`)
    - Hargreaves evaporation (`hargrea`)
 
-5. **UVAFMEModel Class**: Main model orchestration
+5. **GAPPYModel Class**: Main model orchestration
    - Site loop processing
    - Annual simulation cycles
    - Output management
@@ -49,10 +49,10 @@ The Python translation preserves the original model structure while making it mo
 ### Basic Usage
 
 ```python
-from vegetation import UVAFMEModel
+from vegetation import GAPPYModel
 
 # Create model instance
-model = UVAFMEModel()
+model = GAPPYModel()
 
 # Run with default parameters
 model.run()
@@ -178,7 +178,7 @@ To ensure accuracy, the Python translation should be validated against:
 
 Priority areas for completion:
 1. Complete tree growth and mortality algorithms
-2. Implement full I/O system for standard UVAFME file formats
+2. Implement full I/O system for standard GAPPY file formats
 3. Add parameter configuration management
 4. Develop testing framework
 5. Create visualization and analysis tools
@@ -192,4 +192,4 @@ Priority areas for completion:
 
 ## License
 
-This translation maintains the same license as the original UVAFME model.
+This translation maintains the same license as the original GAPPY model.

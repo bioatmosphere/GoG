@@ -1,6 +1,6 @@
 """
-UVAFME (UVA Forest Model Enhanced) main module.
-Translated from UVAFME.f90
+GAPPY (UVA Forest Model Enhanced) main module.
+Translated from GAPPY.f90
 """
 
 import sys
@@ -21,8 +21,8 @@ from .sitelist import initialize_sitelist
 from .climate import set_site_climate
 
 
-class UVAFMEModel:
-    """Main UVAFME model class."""
+class GAPPYModel:
+    """Main GAPPY model class."""
     
     def __init__(self):
         self.sites = []
@@ -37,7 +37,7 @@ class UVAFMEModel:
         """Initialize input files and read data."""
         self.filelist = filelist
         
-        # Use actual UVAFME input file names from input_data directory
+        # Use actual GAPPY input file names from input_data directory
         # Support multiple possible locations for input_data directory
         possible_paths = ['input_data', '../input_data', '../../input_data']
         input_base_path = None
@@ -50,7 +50,7 @@ class UVAFMEModel:
         if input_base_path is None:
             raise FileNotFoundError("Could not find input_data directory in any expected location")
 
-        config_file = os.path.join(input_base_path, 'uvafme_config.json')
+        config_file = os.path.join(input_base_path, 'gappy_config.json')
         species_file = os.path.join(input_base_path, 'UVAFME2012_specieslist.csv')
         site_file = os.path.join(input_base_path, 'UVAFME2012_site.csv')
         climate_file = os.path.join(input_base_path, 'UVAFME2012_climate.csv')
@@ -93,9 +93,18 @@ class UVAFMEModel:
             self._species_data = species_data
 
             # Read site IDs and site data
-            site_ids = [0]  # Use site ID 0 from the UVAFME data
-            self.sites = self.input_manager.read_sites(site_ids)
+            site_ids = [0]  # Use site ID 0 from the GAPPY data
+            self.sites = self.input_manager.read_sites(
+                site_ids,
+                use_dement=self.parameters.use_dement,
+                n_plots=self.parameters.numplots,
+                spatial_mode=self.parameters.dement_spatial_mode
+            )
             print(f"Loaded {len(self.sites)} sites")
+
+            if self.parameters.use_dement:
+                print(f"  → DEMENTpy soil decomposition enabled")
+                print(f"  → Spatial mode: {self.parameters.dement_spatial_mode}")
 
             # Read and attach climate data
             self.input_manager.read_climate(self.sites)
@@ -330,8 +339,8 @@ class UVAFMEModel:
 
 
 def main():
-    """Main entry point for UVAFME model."""
-    model = UVAFMEModel()
+    """Main entry point for GAPPY model."""
+    model = GAPPYModel()
     model.run()
 
 

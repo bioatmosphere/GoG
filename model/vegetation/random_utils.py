@@ -1,5 +1,5 @@
 """
-Random number utilities for UVAFME vegetation model.
+Random number utilities for GAPPY vegetation model.
 Translated from Random.f90
 
 This module implements the exact random number generators from the original Fortran code,
@@ -91,7 +91,7 @@ class ClimateRNG:
 
 
 class RandomState:
-    """Manages random number generator state for UVAFME."""
+    """Manages random number generator state for GAPPY."""
 
     def __init__(self):
         self.site_rng = random.Random()
